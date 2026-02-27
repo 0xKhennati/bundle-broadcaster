@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -12,8 +13,24 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const msgWidth = 35
+
+func formatMsgFixed(i interface{}) string {
+	s, _ := i.(string)
+	if len(s) > msgWidth {
+		return s[:msgWidth]
+	}
+	if len(s) < msgWidth {
+		return s + strings.Repeat(" ", msgWidth-len(s))
+	}
+	return s
+}
+
 func main() {
-	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
+	logger := zerolog.New(zerolog.ConsoleWriter{
+		Out:            os.Stdout,
+		FormatMessage:  formatMsgFixed,
+	}).With().Timestamp().Logger()
 
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
