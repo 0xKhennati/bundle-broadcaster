@@ -11,7 +11,12 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
+	"golang.org/x/term"
 )
+
+func isTerminal(f *os.File) bool {
+	return term.IsTerminal(int(f.Fd()))
+}
 
 const msgWidth = 35
 
@@ -27,10 +32,17 @@ func formatMsgFixed(i interface{}) string {
 }
 
 func main() {
-	logger := zerolog.New(zerolog.ConsoleWriter{
-		Out:            os.Stdout,
-		FormatMessage:  formatMsgFixed,
-	}).With().Timestamp().Logger()
+	var logger zerolog.Logger
+	if os.Getenv("LOG_FORMAT") == "json" {
+		logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+	} else {
+		consoleWriter := zerolog.NewConsoleWriter(func(w *zerolog.ConsoleWriter) {
+			w.Out = os.Stdout
+			w.FormatMessage = formatMsgFixed
+			w.NoColor = !isTerminal(os.Stdout)
+		})
+		logger = zerolog.New(consoleWriter).With().Timestamp().Logger()
+	}
 
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
