@@ -24,9 +24,12 @@ func main() {
 		logger.Fatal().Err(err).Str("path", configPath).Msg("failed to load config")
 	}
 
-	privateKey := os.Getenv("BROADCASTER_PRIVATE_KEY")
+	privateKey := cfg.PrivateKey
 	if privateKey == "" {
-		logger.Fatal().Msg("BROADCASTER_PRIVATE_KEY environment variable is required")
+		privateKey = os.Getenv("BROADCASTER_PRIVATE_KEY")
+	}
+	if privateKey == "" {
+		logger.Fatal().Msg("private_key in config or BROADCASTER_PRIVATE_KEY environment variable is required")
 	}
 	signer, err := NewSigner(privateKey)
 	if err != nil {

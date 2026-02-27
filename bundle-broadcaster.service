@@ -1,0 +1,18 @@
+[Unit]
+Description=Bundle Broadcaster - MEV relay broadcast service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/bundle-broadcaster
+ExecStart=/opt/bundle-broadcaster/bundle-broadcaster
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+# Config path (default: config.json in WorkingDirectory)
+Environment="CONFIG_PATH=/opt/bundle-broadcaster/config.json"
+
+[Install]
+WantedBy=multi-user.target

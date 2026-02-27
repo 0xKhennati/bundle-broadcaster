@@ -13,9 +13,10 @@ type RelayConfig struct {
 }
 
 type Config struct {
-	Server ServerConfig  `json:"server"`
-	Auth   AuthConfig    `json:"auth"`
-	Relays []RelayConfig `json:"relays"`
+	Server    ServerConfig `json:"server"`
+	Auth      AuthConfig   `json:"auth"`
+	PrivateKey string      `json:"private_key"`
+	Relays    []RelayConfig `json:"relays"`
 }
 
 type AuthConfig struct {
