@@ -1,0 +1,4 @@
+/bundle-broadcaster
+*.exe
+.env
+.env.local

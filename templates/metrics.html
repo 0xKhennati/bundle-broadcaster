@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bundle Broadcaster - Metrics</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 2rem; background: #0f0f12; color: #e4e4e7; }
+    h1 { margin: 0 0 1.5rem; font-size: 1.5rem; color: #a1a1aa; }
+    .card { background: #18181b; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid #27272a; }
+    .card h2 { margin: 0 0 0.75rem; font-size: 0.875rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #27272a; }
+    th { color: #71717a; font-weight: 500; }
+    td { font-family: ui-monospace, monospace; }
+    .value { color: #22c55e; font-variant-numeric: tabular-nums; }
+    .meta { color: #a1a1aa; font-size: 0.75rem; margin-top: 1rem; }
+    a { color: #3b82f6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .refresh { margin-bottom: 1rem; }
+    .refresh button { background: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+    .refresh button:hover { background: #3f3f46; }
+  </style>
+</head>
+<body>
+  <h1>Bundle Broadcaster Metrics</h1>
+  <div class="refresh">
+    <button onclick="location.reload()">Refresh</button>
+    <a href="/metrics" target="_blank" style="margin-left: 1rem;">Prometheus format</a>
+  </div>
+
+  <div class="card">
+    <h2>Overview</h2>
+    <table>
+      <tr><th>Metric</th><th>Value</th></tr>
+      <tr><td>Bundles Received</td><td class="value">{{.BundleReceived}}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Bundles Sent by Relay</h2>
+    <table>
+      <tr><th>Relay</th><th>Count</th></tr>
+      {{range .BundleSent}}
+      <tr><td>{{.Relay}}</td><td class="value">{{.Value}}</td></tr>
+      {{end}}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Bundles Failed by Relay</h2>
+    <table>
+      <tr><th>Relay</th><th>Count</th></tr>
+      {{range .BundleFailed}}
+      <tr><td>{{.Relay}}</td><td class="value">{{.Value}}</td></tr>
+      {{end}}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Relay Latency (ms)</h2>
+    <table>
+      <tr><th>Relay</th><th>Count</th><th>Sum</th></tr>
+      {{range .RelayLatency}}
+      <tr><td>{{.Relay}}</td><td class="value">{{.Count}}</td><td class="value">{{.Sum}}</td></tr>
+      {{end}}
+    </table>
+  </div>
+
+  <p class="meta">Last updated: {{.UpdatedAt}}</p>
+</body>
+</html>
