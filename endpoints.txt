@@ -23,3 +23,11 @@
     //   "url": "https://relay.flashbots.net",
     //   "type": "default" 
     // }
+
+
+
+
+    {
+      "name": "titanbuilder",
+      "url": "https://eu.rpc.titanbuilder.xyz"
+    }

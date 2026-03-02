@@ -6,16 +6,17 @@ import (
 	"github.com/0xKhennati/bundle-broadcaster/strategies"
 )
 
+// ok ok ok
 type TitanbuilderBuilder struct{}
 
 func (b *TitanbuilderBuilder) BuildRequest(bundle *strategies.IncomingBundle) (string, interface{}, error) {
-	if bundle.StrategyType == strategies.StrategyTargetBlock || bundle.StrategyType == strategies.StrategyPendingBlock {
-		return "eth_sendEndOfBlockBundle", map[string]interface{}{
-			"txs":         bundle.RawTxs,
-			"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
-			"targetPools": bundle.TargetPools,
-		}, nil
-	}
+	// if bundle.StrategyType == strategies.StrategyTargetBlock || bundle.StrategyType == strategies.StrategyPendingBlock {
+	// 	return "eth_sendEndOfBlockBundle", map[string]interface{}{
+	// 		"txs":         bundle.RawTxs,
+	// 		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
+	// 		"targetPools": bundle.TargetPools,
+	// 	}, nil
+	// }
 	return "eth_sendBundle", map[string]interface{}{
 		"txs":         bundle.RawTxs,
 		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),

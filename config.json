@@ -12,8 +12,8 @@
   "log_level": "info",
   "relays": [
     {
-      "name": "titanbuilder",
-      "url": "https://eu.rpc.titanbuilder.xyz"
+      "name": "buildernet",
+      "url": "https://rpc.buildernet.org"
     }
     
   ]
