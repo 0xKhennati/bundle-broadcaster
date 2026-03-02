@@ -9,10 +9,20 @@ import (
 type BuildernetBuilder struct{}
 
 func (b *BuildernetBuilder) BuildRequest(bundle *strategies.IncomingBundle) (string, interface{}, error) {
-	return "eth_sendBundle", map[string]interface{}{
+	params := map[string]interface{}{
 		"txs":         bundle.RawTxs,
 		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
-	}, nil
+	}
+	if len(bundle.RevertingTxHashes) > 0 {
+		params["revertingTxHashes"] = bundle.RevertingTxHashes
+	}
+	if bundle.MinTimestamp > 0 {
+		params["minTimestamp"] = bundle.MinTimestamp
+	}
+	if bundle.MaxTimestamp > 0 {
+		params["maxTimestamp"] = bundle.MaxTimestamp
+	}
+	return "eth_sendBundle", params, nil
 }
 
 // {
