@@ -12,11 +12,12 @@ func NewDefaultBundleStrategy() *DefaultBundleStrategy {
 
 func (s *DefaultBundleStrategy) BuildRequest(bundle *IncomingBundle) (string, interface{}, error) {
 	payload := map[string]interface{}{
-		"txs":                bundle.RawTxs,
-		"blockNumber":        fmt.Sprintf("0x%x", bundle.TargetBlock),
-		"minTimestamp":       bundle.MinTimestamp,
-		"maxTimestamp":       bundle.MaxTimestamp,
-		"revertingTxHashes":  bundle.RevertingTxHashes,
+		"txs":               bundle.RawTxs,
+		"blockNumber":       fmt.Sprintf("0x%x", bundle.TargetBlock),
+		"minTimestamp":      bundle.MinTimestamp,
+		"maxTimestamp":      bundle.MaxTimestamp,
+		"revertingTxHashes": bundle.RevertingTxHashes,
+		"targetPools":       bundle.TargetPools,
 	}
 	return "eth_sendBundle", payload, nil
 }

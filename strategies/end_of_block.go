@@ -18,6 +18,7 @@ func (s *EndOfBlockStrategy) BuildRequest(bundle *IncomingBundle) (string, inter
 			"minTimestamp":      bundle.MinTimestamp,
 			"maxTimestamp":      bundle.MaxTimestamp,
 			"revertingTxHashes": bundle.RevertingTxHashes,
+			"targetPools":       bundle.TargetPools,
 		}
 		return "eth_sendEndOfBlockBundle", payload, nil
 	}
@@ -27,6 +28,7 @@ func (s *EndOfBlockStrategy) BuildRequest(bundle *IncomingBundle) (string, inter
 		"minTimestamp":      bundle.MinTimestamp,
 		"maxTimestamp":      bundle.MaxTimestamp,
 		"revertingTxHashes": bundle.RevertingTxHashes,
+		"targetPools":       bundle.TargetPools,
 	}
 	return "eth_sendBundle", payload, nil
 }

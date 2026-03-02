@@ -5,9 +5,9 @@ type RelayStrategy interface {
 }
 
 const (
-	StrategyTargetBlock   = "target_block"
-	StrategyTargetTx      = "target_tx"
-	StrategyPendingBlock  = "pending_block"
+	StrategyTargetBlock  = "target_block"
+	StrategyTargetTx     = "target_tx"
+	StrategyPendingBlock = "pending_block"
 )
 
 type IncomingBundle struct {
@@ -19,4 +19,5 @@ type IncomingBundle struct {
 	MinTimestamp      uint64   `json:"min_timestamp"`
 	MaxTimestamp      uint64   `json:"max_timestamp"`
 	RevertingTxHashes []string `json:"reverting_tx_hashes"`
+	TargetPools       []string `json:"target_pools"`
 }

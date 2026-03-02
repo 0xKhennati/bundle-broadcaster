@@ -12,8 +12,8 @@
   "relays": [
     {
       "name": "titanbuilder",
-      "url": "https://rpc.titanbuilder.xyz",
-      "type": "sendEndOfBlockBundle"
+      "url": "eu.rpc.titanbuilder.xyz",
+      "type": "sendEndOfBlockBundle" 
     },
     {
       "name": "quasar",

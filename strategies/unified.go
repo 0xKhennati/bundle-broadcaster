@@ -22,5 +22,6 @@ func (s *UnifiedBundleStrategy) formatPayload(bundle *IncomingBundle) map[string
 		"minTimestamp":      bundle.MinTimestamp,
 		"maxTimestamp":      bundle.MaxTimestamp,
 		"revertingTxHashes": bundle.RevertingTxHashes,
+		"targetPools":       bundle.TargetPools,
 	}
 }

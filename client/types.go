@@ -17,4 +17,5 @@ type BundleRequest struct {
 	MinTimestamp      uint64   `json:"min_timestamp"`
 	MaxTimestamp      uint64   `json:"max_timestamp"`
 	RevertingTxHashes []string `json:"reverting_tx_hashes"`
+	TargetPools       []string `json:"target_pools"`
 }
