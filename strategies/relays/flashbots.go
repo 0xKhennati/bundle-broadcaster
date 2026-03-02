@@ -3,7 +3,7 @@ package relays
 import (
 	"fmt"
 
-	"github.com/bundle-broadcaster/strategies"
+	"github.com/0xKhennati/bundle-broadcaster/strategies"
 )
 
 type FlashbotsBuilder struct{}

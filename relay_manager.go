@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/bundle-broadcaster/strategies"
+	"github.com/0xKhennati/bundle-broadcaster/strategies"
 	"github.com/rs/zerolog"
 )
 
 func newSharedHTTPClient() *http.Client {
 	transport := &http.Transport{
-		MaxIdleConns:           maxIdleConns,
-		MaxIdleConnsPerHost:    maxIdleConnsHost,
-		IdleConnTimeout:        idleConnTimeout,
-		DisableKeepAlives:      false,
-		ForceAttemptHTTP2:      true,
+		MaxIdleConns:          maxIdleConns,
+		MaxIdleConnsPerHost:   maxIdleConnsHost,
+		IdleConnTimeout:       idleConnTimeout,
+		DisableKeepAlives:     false,
+		ForceAttemptHTTP2:     true,
 		ExpectContinueTimeout: 0,
 	}
 	return &http.Client{

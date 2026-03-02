@@ -12,17 +12,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bundle-broadcaster/strategies"
+	"github.com/0xKhennati/bundle-broadcaster/strategies"
 	"github.com/rs/zerolog"
 )
 
 const (
-	httpTimeout       = 900 * time.Millisecond
-	maxIdleConns      = 1000
-	maxIdleConnsHost  = 500
-	idleConnTimeout   = 5 * time.Minute
-	warmConnPerRelay  = 100
-	maxRetries        = 3
+	httpTimeout      = 900 * time.Millisecond
+	maxIdleConns     = 1000
+	maxIdleConnsHost = 500
+	idleConnTimeout  = 5 * time.Minute
+	warmConnPerRelay = 100
+	maxRetries       = 3
 )
 
 var jsonEncoderPool = sync.Pool{

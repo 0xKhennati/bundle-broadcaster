@@ -1,6 +1,6 @@
 package relays
 
-import "github.com/bundle-broadcaster/strategies"
+import "github.com/0xKhennati/bundle-broadcaster/strategies"
 
 func init() {
 	strategies.RegisterRelay("flashbots", &FlashbotsBuilder{})

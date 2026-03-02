@@ -1,7 +1,7 @@
 package relays
 
 import (
-	"github.com/bundle-broadcaster/strategies"
+	"github.com/0xKhennati/bundle-broadcaster/strategies"
 )
 
 type TitanbuilderBuilder struct{}
