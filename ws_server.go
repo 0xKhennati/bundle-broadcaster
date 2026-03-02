@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/bundle-broadcaster/strategies"
+	"github.com/0xKhennati/bundle-broadcaster/strategies"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 )
