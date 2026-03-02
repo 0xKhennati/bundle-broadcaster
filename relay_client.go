@@ -143,12 +143,12 @@ func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.Incoming
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		BundleSentTotal.WithLabelValues(c.relay.Name).Inc()
-		c.logger.Info().Str("relay", c.relay.Name).Str("bundle_id", bundle.BundleID).
+		c.logger.Info().Str("relay", c.relay.Name).
 			Int64("latency_ms", latencyMs).Int("status", resp.StatusCode).
 			Str("response", string(respBody)).Msg("relay response")
 	} else {
 		BundleFailedTotal.WithLabelValues(c.relay.Name).Inc()
-		c.logger.Warn().Str("relay", c.relay.Name).Str("bundle_id", bundle.BundleID).
+		c.logger.Warn().Str("relay", c.relay.Name).
 			Int64("latency_ms", latencyMs).Int("status", resp.StatusCode).
 			Str("response", string(respBody)).Msg("relay response")
 	}
