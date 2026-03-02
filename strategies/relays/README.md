@@ -1,6 +1,15 @@
 # Relay-Specific Builders
 
-Each relay has its own `BuildRequest` function that formats the bundle payload for that relay's API.
+Each relay has its own `BuildRequest` function. Relays are identified by `name` in config. **A relay must be registered to work** – config only has `name` and `url`.
+
+## Config Format
+
+```json
+"relays": [
+  { "name": "titanbuilder", "url": "https://eu.rpc.titanbuilder.xyz" },
+  { "name": "flashbots", "url": "https://relay.flashbots.net" }
+]
+```
 
 ## Adding a New Relay
 
@@ -10,13 +19,12 @@ Each relay has its own `BuildRequest` function that formats the bundle payload f
 package relays
 
 import (
-	"github.com/bundle-broadcaster/strategies"
+	"github.com/0xKhennati/bundle-broadcaster/strategies"
 )
 
 type MyrelayBuilder struct{}
 
 func (b *MyrelayBuilder) BuildRequest(bundle *strategies.IncomingBundle) (string, interface{}, error) {
-	// Custom payload formatting for this relay
 	return "eth_sendBundle", basePayload(bundle), nil
 }
 ```
@@ -27,6 +35,10 @@ func (b *MyrelayBuilder) BuildRequest(bundle *strategies.IncomingBundle) (string
 strategies.RegisterRelay("myrelay", &MyrelayBuilder{})
 ```
 
-## Fallback
+3. Add to config.json:
 
-Relays not in the registry use the type-based strategy from config (`default`, `sendEndOfBlockBundle`, `unified_bundle`).
+```json
+{ "name": "myrelay", "url": "https://myrelay.example.com" }
+```
+
+Relays in config without a registered builder are skipped with a warning.

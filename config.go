@@ -9,7 +9,6 @@ import (
 type RelayConfig struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
-	Type string `json:"type"`
 }
 
 type Config struct {
@@ -42,12 +41,6 @@ func (s *ServerConfig) Addr() string {
 	}
 	return fmt.Sprintf("%s:%d", addr, port)
 }
-
-const (
-	RelayTypeDefault       = "default"
-	RelayTypeEndOfBlock    = "sendEndOfBlockBundle"
-	RelayTypeUnifiedBundle = "unified_bundle"
-)
 
 func LoadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)

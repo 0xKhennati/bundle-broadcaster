@@ -13,33 +13,7 @@
   "relays": [
     {
       "name": "titanbuilder",
-      "url": "eu.rpc.titanbuilder.xyz",
-      "type": "sendEndOfBlockBundle" 
-    },
-    {
-      "name": "quasar",
-      "url": "https://rpc.quasar.win",
-      "type": "sendEndOfBlockBundle"
-    },
-    {
-      "name": "bobthebuilder",
-      "url": "https://rpc.bobthebuilder.xyz",
-      "type": "default" 
-    },
-    {
-      "name": "beaverbuild",
-      "url": "https://rpc.beaverbuild.org/",
-      "type": "default" 
-    },
-    {
-      "name": "buildernet",
-      "url": "https://rpc.buildernet.org",
-      "type": "default" 
-    },
-    {
-      "name": "flashbots",
-      "url": "https://relay.flashbots.net",
-      "type": "default" 
+      "url": "eu.rpc.titanbuilder.xyz"
     }
     
   ]

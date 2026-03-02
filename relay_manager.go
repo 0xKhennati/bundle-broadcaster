@@ -34,7 +34,9 @@ func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logge
 	for _, relay := range cfg.Relays {
 		builder := strategies.GetRelayBuilder(relay.Name)
 		if builder == nil {
-			builder = strategyForType(relay.Type)
+			logger.Warn().Str("relay", relay.Name).Str("url", relay.URL).
+				Msg("relay not registered, skipping - add builder in strategies/relays/ and register in register.go")
+			continue
 		}
 		client := NewRelayClient(relay, builder, signer, httpClient, logger)
 		clients = append(clients, client)
@@ -42,17 +44,6 @@ func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logge
 	return &RelayManager{
 		clients: clients,
 		logger:  logger,
-	}
-}
-
-func strategyForType(relayType string) strategies.RelayStrategy {
-	switch relayType {
-	case RelayTypeEndOfBlock:
-		return strategies.NewEndOfBlockStrategy()
-	case RelayTypeUnifiedBundle:
-		return strategies.NewUnifiedBundleStrategy()
-	default:
-		return strategies.NewDefaultBundleStrategy()
 	}
 }
 
