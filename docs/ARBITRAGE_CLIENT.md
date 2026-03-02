@@ -138,53 +138,43 @@ Send a **single JSON object** per WebSocket message. All fields use the exact na
 
 ---
 
-## Go Client Example
+## Go Client Package
+
+Use the bundled `client` package:
+
+```bash
+go get github.com/bundle-broadcaster/client
+```
 
 ```go
 package main
 
 import (
-    "encoding/json"
     "log"
 
-    "github.com/gorilla/websocket"
+    "github.com/bundle-broadcaster/client"
 )
 
-type BundleRequest struct {
-    BundleID          string   `json:"bundle_id"`
-    StrategyType      string   `json:"strategy_type"`
-    TargetBlock       uint64   `json:"target_block"`
-    TargetTxHash      string   `json:"target_tx_hash"`
-    RawTxs            []string `json:"raw_txs"`
-    MinTimestamp      uint64   `json:"min_timestamp"`
-    MaxTimestamp      uint64   `json:"max_timestamp"`
-    RevertingTxHashes []string `json:"reverting_tx_hashes"`
-}
-
 func main() {
-    conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8585/ws", nil)
+    c, err := client.New("ws://localhost:8585/ws")
     if err != nil {
         log.Fatal(err)
     }
-    defer conn.Close()
+    defer c.Close()
 
-    req := BundleRequest{
-        BundleID:          "bundle-001",
-        StrategyType:      "target_block",
-        TargetBlock:       21000000,
-        RawTxs:            []string{"0x02f8..."},
-        MinTimestamp:      0,
-        MaxTimestamp:      0,
-        RevertingTxHashes: nil,
-    }
-    msg, _ := json.Marshal(req)
-    if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+    err = c.Send(&client.BundleRequest{
+        BundleID:     "bundle-001",
+        StrategyType: client.StrategyTargetBlock,
+        TargetBlock:  21000000,
+        RawTxs:       []string{"0x02f8..."},
+    })
+    if err != nil {
         log.Fatal(err)
     }
 }
 ```
 
-**Dependency:** `go get github.com/gorilla/websocket`
+The client handles connection, JSON marshaling, and reconnection on failure.
 
 ---
 

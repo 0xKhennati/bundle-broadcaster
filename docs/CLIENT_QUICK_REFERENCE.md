@@ -1,70 +1,70 @@
 # Bundle Broadcaster - Client Quick Reference
 
-For Cursor agents building Go arbitrage clients. Copy this into your arbitrage project.
+Use the `client` package in your arbitrage bot to send bundles to the broadcaster.
 
-## WebSocket
+For full documentation, see [CLIENT_USAGE.md](CLIENT_USAGE.md).
 
-- **URL:** `ws://<host>:<port>/ws`
-- **Auth:** None
-- **Format:** JSON, one object per message
+## Install
 
-## Request Schema (exact field names)
-
-```json
-{
-  "bundle_id": "string",
-  "strategy_type": "target_block | target_tx | pending_block",
-  "target_block": 12345678,
-  "target_tx_hash": "0x...",
-  "raw_txs": ["0x...", "0x..."],
-  "min_timestamp": 0,
-  "max_timestamp": 0,
-  "reverting_tx_hashes": []
-}
+```bash
+go get github.com/bundle-broadcaster/client
 ```
 
-## Required Fields
-
-- `bundle_id` (string)
-- `strategy_type` (one of: `target_block`, `target_tx`, `pending_block`)
-- `target_block` (uint64)
-- `raw_txs` (array of hex strings, 0x-prefixed signed RLP)
-
-## Optional Fields
-
-- `target_tx_hash` – for `target_tx` strategy
-- `min_timestamp`, `max_timestamp` – block timestamp bounds
-- `reverting_tx_hashes` – tx hashes that would revert the bundle
-
-## Go Struct
+## Usage
 
 ```go
-type BundleRequest struct {
-    BundleID          string   `json:"bundle_id"`
-    StrategyType      string   `json:"strategy_type"`
-    TargetBlock       uint64   `json:"target_block"`
-    TargetTxHash      string   `json:"target_tx_hash"`
-    RawTxs            []string `json:"raw_txs"`
-    MinTimestamp      uint64   `json:"min_timestamp"`
-    MaxTimestamp      uint64   `json:"max_timestamp"`
-    RevertingTxHashes []string `json:"reverting_tx_hashes"`
+package main
+
+import (
+    "log"
+
+    "github.com/bundle-broadcaster/client"
+)
+
+func main() {
+    c, err := client.New("ws://localhost:8585/ws")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer c.Close()
+
+    err = c.Send(&client.BundleRequest{
+        BundleID:     "bundle-001",
+        StrategyType: client.StrategyTargetBlock,
+        TargetBlock:  21000000,
+        RawTxs:       []string{"0x02f8..."},
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
-## Send Example (Go)
+## Client API
+
+- `client.New(wsURL string) (*Client, error)` – create client, connect immediately, store URL
+- `c.Send(b *client.BundleRequest) error` – send bundle (reconnects automatically if connection closed)
+- `c.Close() error` – close connection (prevents reconnection)
+
+## BundleRequest Type
+
+Use `client.BundleRequest` and `client.StrategyTargetBlock`, `client.StrategyTargetTx`, `client.StrategyPendingBlock`:
 
 ```go
-conn, _, _ := websocket.DefaultDialer.Dial("ws://localhost:8585/ws", nil)
-defer conn.Close()
-
-req := BundleRequest{
-    BundleID:     "bundle-001",
-    StrategyType: "target_block",
-    TargetBlock:  21000000,
-    RawTxs:       []string{"0x02f8..."},
+&client.BundleRequest{
+    BundleID:          "bundle-001",
+    StrategyType:      client.StrategyTargetBlock,
+    TargetBlock:       21000000,
+    TargetTxHash:      "",
+    RawTxs:            []string{"0x02f8..."},
+    MinTimestamp:      0,
+    MaxTimestamp:      0,
+    RevertingTxHashes: nil,
 }
-msg, _ := json.Marshal(req)
-conn.WriteMessage(websocket.TextMessage, msg)
 ```
 
-**Dependency:** `go get github.com/gorilla/websocket`
+## Strategy Constants
+
+- `client.StrategyTargetBlock`
+- `client.StrategyTargetTx`
+- `client.StrategyPendingBlock`
