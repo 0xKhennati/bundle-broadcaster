@@ -90,7 +90,7 @@ func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.Incoming
 		return
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.relay.URL, bytes.NewReader(bodyBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.relay.ResolvedURL(), bytes.NewReader(bodyBytes))
 	if err != nil {
 		c.logger.Error().Err(err).Str("relay", c.relay.Name).Str("bundle_id", bundle.BundleID).Msg("failed to create request")
 		BundleFailedTotal.WithLabelValues(c.relay.Name).Inc()
@@ -107,7 +107,7 @@ func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.Incoming
 	var lastErr error
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		if attempt > 0 {
-			req, _ = http.NewRequestWithContext(ctx, http.MethodPost, c.relay.URL, bytes.NewReader(bodyCopy))
+			req, _ = http.NewRequestWithContext(ctx, http.MethodPost, c.relay.ResolvedURL(), bytes.NewReader(bodyCopy))
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("X-Flashbots-Signature", signature)
 			req.ContentLength = int64(len(bodyCopy))
@@ -190,7 +190,7 @@ func (c *RelayClient) WarmConnections(ctx context.Context) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.relay.URL, bytes.NewReader(warmReqBody))
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.relay.ResolvedURL(), bytes.NewReader(warmReqBody))
 			if err != nil {
 				return
 			}

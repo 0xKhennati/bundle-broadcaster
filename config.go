@@ -4,11 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type RelayConfig struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
+}
+
+// ResolvedURL returns the relay URL with https:// prepended if no scheme is present.
+func (r *RelayConfig) ResolvedURL() string {
+	url := r.URL
+	if url == "" {
+		return ""
+	}
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		return "https://" + url
+	}
+	return url
 }
 
 type Config struct {
