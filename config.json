@@ -13,7 +13,7 @@
   "relays": [
     {
       "name": "buildernet",
-      "url": "hhttps://direct-eu.buildernet.org"
+      "url": "https://direct-eu.buildernet.org"
     }
     
   ]
