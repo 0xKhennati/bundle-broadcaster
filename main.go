@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,6 +33,28 @@ func formatMsgFixed(i interface{}) string {
 }
 
 func main() {
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "config.json"
+	}
+	cfg, err := LoadConfig(configPath)
+	if err != nil {
+		log.Fatalf("failed to load config from %s: %v", configPath, err)
+	}
+
+	switch strings.ToLower(cfg.LogLevel) {
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "trace":
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+
 	var logger zerolog.Logger
 	if os.Getenv("LOG_FORMAT") == "json" {
 		logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
@@ -42,15 +65,6 @@ func main() {
 			w.NoColor = !isTerminal(os.Stdout)
 		})
 		logger = zerolog.New(consoleWriter).With().Timestamp().Logger()
-	}
-
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		configPath = "config.json"
-	}
-	cfg, err := LoadConfig(configPath)
-	if err != nil {
-		logger.Fatal().Err(err).Str("path", configPath).Msg("failed to load config")
 	}
 
 	privateKey := cfg.PrivateKey

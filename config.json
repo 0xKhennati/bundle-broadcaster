@@ -9,6 +9,7 @@
     "lockout_minutes": 15
   },
   "private_key": "a40974bec39a17e36ba4a6b4d298ff944bacb448cbed5efcae784d7bf4f2ff83",
+  "log_level": "info",
   "relays": [
     {
       "name": "titanbuilder",

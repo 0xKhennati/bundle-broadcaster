@@ -95,6 +95,18 @@ func (s *WSServer) HandleWS(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		s.logger.Debug().
+			Str("bundle_id", bundle.BundleID).
+			Str("strategy_type", bundle.StrategyType).
+			Uint64("target_block", bundle.TargetBlock).
+			Str("target_tx_hash", bundle.TargetTxHash).
+			Strs("raw_txs", bundle.RawTxs).
+			Uint64("min_timestamp", bundle.MinTimestamp).
+			Uint64("max_timestamp", bundle.MaxTimestamp).
+			Strs("reverting_tx_hashes", bundle.RevertingTxHashes).
+			Strs("target_pools", bundle.TargetPools).
+			Msg("bundle received")
+
 		BundleReceivedTotal.Inc()
 
 		if s.closed.Load() {
