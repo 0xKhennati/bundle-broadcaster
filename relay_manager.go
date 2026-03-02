@@ -32,8 +32,11 @@ type RelayManager struct {
 func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logger zerolog.Logger) *RelayManager {
 	clients := make([]*RelayClient, 0, len(cfg.Relays))
 	for _, relay := range cfg.Relays {
-		strategy := strategyForType(relay.Type)
-		client := NewRelayClient(relay, strategy, signer, httpClient, logger)
+		builder := strategies.GetRelayBuilder(relay.Name)
+		if builder == nil {
+			builder = strategyForType(relay.Type)
+		}
+		client := NewRelayClient(relay, builder, signer, httpClient, logger)
 		clients = append(clients, client)
 	}
 	return &RelayManager{

@@ -1,4 +1,4 @@
-module github.com/bundle-broadcaster
+module github.com/0xKhennati/bundle-broadcaster
 
 go 1.21
 
