@@ -31,12 +31,18 @@ func NewSigner(privateKeyHex string) (*Signer, error) {
 	}, nil
 }
 
+// Sign produces the X-Flashbots-Signature header value using personal_sign (EIP-191).
+// Format: address:signature_hex
+// The message signed is the keccak256 hash of the body, hex-encoded, wrapped in the personal_sign prefix.
 func (s *Signer) Sign(body []byte) (string, error) {
-	hash := crypto.Keccak256Hash(body)
-	signature, err := crypto.Sign(hash.Bytes(), s.privateKey)
+	bodyHash := crypto.Keccak256Hash(body)
+	hashHex := "0x" + hex.EncodeToString(bodyHash.Bytes())
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(hashHex), hashHex)
+	hashToSign := crypto.Keccak256Hash([]byte(msg))
+	signature, err := crypto.Sign(hashToSign.Bytes(), s.privateKey)
 	if err != nil {
 		return "", err
 	}
 	sigHex := hex.EncodeToString(signature)
-	return fmt.Sprintf("0x%s:%s", s.address, sigHex), nil
+	return fmt.Sprintf("%s:0x%s", s.address, sigHex), nil
 }
