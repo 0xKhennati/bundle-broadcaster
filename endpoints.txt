@@ -1,29 +1,27 @@
-{
-    //   "name": "quasar",
-    //   "url": "https://rpc.quasar.win",
-    //   "type": "sendEndOfBlockBundle"
-    // },
-    // {
-    //   "name": "bobthebuilder",
-    //   "url": "https://rpc.bobthebuilder.xyz",
-    //   "type": "default" 
-    // },
-    // {
-    //   "name": "beaverbuild",
-    //   "url": "https://rpc.beaverbuild.org/",
-    //   "type": "default" 
-    // },
-    // {
-    //   "name": "buildernet",
-    //   "url": "https://rpc.buildernet.org",
-    //   "type": "default" 
-    // },
-    // {
-    //   "name": "flashbots",
-    //   "url": "https://relay.flashbots.net",
-    //   "type": "default" 
-    // }
-
+,
+    {
+      "name": "buildernet",
+      "url": "https://direct-eu.buildernet.org"
+    },{
+        "name": "bobthebuilder",
+      "url": "https://rpc.bobthebuilder.xyz"
+    },
+    {
+      "name": "beaverbuild",
+      "url": "https://rpc.beaverbuild.org"
+    },
+    {
+      "name": "buildernet",
+      "url": "https://rpc.buildernet.org"
+    },
+    {
+      "name": "flashbots",
+      "url": "https://relay.flashbots.net"
+    },   
+    {
+      "name": "quasar",
+      "url": "https://rpc.quasar.win"
+    }
 
 
 

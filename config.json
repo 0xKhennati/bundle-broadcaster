@@ -12,31 +12,8 @@
   "log_level": "info",
   "relays": [
     {
-      "name": "quasar",
-      "url": "https://rpc.quasar.win"
-    },
-    {
       "name": "titanbuilder",
       "url": "https://eu.rpc.titanbuilder.xyz"
-    },
-    {
-      "name": "buildernet",
-      "url": "https://direct-eu.buildernet.org"
-    },{
-        "name": "bobthebuilder",
-      "url": "https://rpc.bobthebuilder.xyz"
-    },
-    {
-      "name": "beaverbuild",
-      "url": "https://rpc.beaverbuild.org"
-    },
-    {
-      "name": "buildernet",
-      "url": "https://rpc.buildernet.org"
-    },
-    {
-      "name": "flashbots",
-      "url": "https://relay.flashbots.net"
     }
   ]
 }
