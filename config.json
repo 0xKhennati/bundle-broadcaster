@@ -12,8 +12,8 @@
   "log_level": "info",
   "relays": [
     {
-      "name": "beaverbuild",
-      "url": "https://rpc.beaverbuild.org"
+      "name": "quasar",
+      "url": "https://rpc.quasar.win"
     }
     
   ]
