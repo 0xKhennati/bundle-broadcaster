@@ -12,8 +12,8 @@
   "log_level": "info",
   "relays": [
     {
-      "name": "flashbots",
-      "url": "https://relay.flashbots.net"
+      "name": "beaverbuild",
+      "url": "https://rpc.beaverbuild.org"
     }
     
   ]
