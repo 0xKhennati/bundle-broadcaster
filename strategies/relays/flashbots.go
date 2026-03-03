@@ -14,11 +14,7 @@ func (b *FlashbotsBuilder) BuildRequest(bundle *strategies.IncomingBundle) (stri
 
 func basePayload(bundle *strategies.IncomingBundle) map[string]interface{} {
 	return map[string]interface{}{
-		"txs":               bundle.RawTxs,
-		"blockNumber":       fmt.Sprintf("0x%x", bundle.TargetBlock),
-		"minTimestamp":      bundle.MinTimestamp,
-		"maxTimestamp":      bundle.MaxTimestamp,
-		"revertingTxHashes": bundle.RevertingTxHashes,
-		"targetPools":       bundle.TargetPools,
+		"txs":         bundle.RawTxs,
+		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
 	}
 }
