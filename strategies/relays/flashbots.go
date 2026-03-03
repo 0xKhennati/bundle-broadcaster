@@ -12,6 +12,7 @@ func (b *FlashbotsBuilder) BuildRequest(bundle *strategies.IncomingBundle) (stri
 	return "eth_sendBundle", map[string]interface{}{
 		"txs":         bundle.RawTxs,
 		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
+		"builders":    []string{"f1b.io", "rsync", "beaverbuild.org", "builder0x69", "Titan", "EigenPhi", "boba-builder", "Gambit Labs", "payload", "Loki", "BuildAI", "JetBuilder", "tbuilder", "penguinbuild", "bobthebuilder", "BTCS", "bloXroute", "Blockbeelder", "Quasar", "Eureka"},
 	}, nil
 }
 
@@ -19,7 +20,6 @@ func basePayload(bundle *strategies.IncomingBundle) map[string]interface{} {
 	return map[string]interface{}{
 		"txs":         bundle.RawTxs,
 		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
-		"builders": []string{"f1b.io","rsync","beaverbuild.org","builder0x69","Titan","EigenPhi","boba-builder","Gambit Labs","payload","Loki","BuildAI","JetBuilder","tbuilder","penguinbuild","bobthebuilder","BTCS","bloXroute","Blockbeelder","Quasar","Eureka",},
 	}
 }
 
@@ -39,12 +39,3 @@ func basePayload(bundle *strategies.IncomingBundle) map[string]interface{} {
 // 	  }
 // 	]
 //   }
-
-
-{
-	"name": "flashbots",
-	"rpc": "rpc.flashbots.net",
-	"supported-apis": ["v0.1"]
-},
-
-"f1b.io","rsync","beaverbuild.org","builder0x69","Titan","EigenPhi","boba-builder","Gambit Labs","payload","Loki","BuildAI","JetBuilder","tbuilder","penguinbuild","bobthebuilder","BTCS","bloXroute","Blockbeelder","Quasar","Eureka",
