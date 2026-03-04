@@ -33,3 +33,42 @@
       "name": "buildernet",
       "url": "https://direct-eu.buildernet.org"
     }
+
+
+
+    [[broadcast.endpoints]]
+name = "flashbots"
+type = "buildernet"
+url = "https://relay.flashbots.net"
+method = "eth_sendBundle"
+
+[[broadcast.endpoints]]
+name = "buildernet"
+type = "buildernet"
+url = "https://rpc.buildernet.org"
+method = "eth_sendBundle"
+
+[[broadcast.endpoints]]
+name = "beaverbuild"
+type = "beaverbuild"
+url = "https://rpc.beaverbuild.org/"
+method = "eth_sendBundle"
+
+
+[[broadcast.endpoints]]
+name = "beaverbuild"
+type = "beaverbuild"
+url = "https://rpc.beaverbuild.org"
+method = "eth_sendBundle"
+
+[[broadcast.endpoints]]
+name = "quasar"
+type = "quasar"
+url = "https://rpc.quasar.win"
+method = "eth_sendEndOfBlockBundle"
+
+[[broadcast.endpoints]]
+name = "bobthebuilder"
+type = "bobthebuilder"
+url = "https://rpc.bobthebuilder.xyz"
+method = "eth_sendBundle"
