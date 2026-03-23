@@ -13,7 +13,11 @@ import (
 )
 
 const (
-	workerCount   = 256
+	// workerCount controls how many bundles can be broadcast concurrently.
+	// Formula: bundles_per_second × max_relay_timeout_sec × safety_factor
+	// Example: 20 bundles/sec × 0.9s timeout × 3 = 54 → round up to 64.
+	// More workers = more simultaneous connections to each relay = more 429s.
+	workerCount   = 64
 	queueCapacity = 4096
 )
 

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/0xKhennati/bundle-broadcaster/strategies"
@@ -17,12 +18,13 @@ import (
 )
 
 const (
-	httpTimeout      = 900 * time.Millisecond
-	maxIdleConns     = 1000
-	maxIdleConnsHost = 500
-	idleConnTimeout  = 5 * time.Minute
-	warmConnPerRelay = 100
-	maxRetries       = 3
+	httpTimeout             = 900 * time.Millisecond
+	maxIdleConns            = 1000
+	maxIdleConnsHost        = 500
+	idleConnTimeout         = 5 * time.Minute
+	warmConnPerRelay        = 100
+	maxRetries              = 3
+	defaultCooldownMs       = 1000 // 1 second default 429 backoff
 )
 
 var jsonEncoderPool = sync.Pool{
@@ -37,6 +39,9 @@ type RelayClient struct {
 	relay    RelayConfig
 	strategy strategies.RelayStrategy
 	logger   zerolog.Logger
+	// rateLimitedUntil holds a Unix nanosecond timestamp.
+	// While time.Now().UnixNano() < rateLimitedUntil, all broadcasts are skipped.
+	rateLimitedUntil atomic.Int64
 }
 
 func NewRelayClient(relay RelayConfig, strategy strategies.RelayStrategy, signer *Signer, client *http.Client, logger zerolog.Logger) *RelayClient {
@@ -56,7 +61,23 @@ type jsonRPCRequest struct {
 	Params  interface{} `json:"params"`
 }
 
+func (c *RelayClient) cooldownMs() int64 {
+	if c.relay.RateLimitCooldownMs > 0 {
+		return int64(c.relay.RateLimitCooldownMs)
+	}
+	return defaultCooldownMs
+}
+
 func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.IncomingBundle) {
+	// Skip relay if it is currently in a 429 cooldown window.
+	if until := c.rateLimitedUntil.Load(); until > 0 && time.Now().UnixNano() < until {
+		c.logger.Debug().Str("relay", c.relay.Name).Str("bundle_id", bundle.BundleID).
+			Int64("cooldown_remaining_ms", (until-time.Now().UnixNano())/int64(time.Millisecond)).
+			Msg("relay rate-limited, skipping bundle")
+		BundleRateLimitedTotal.WithLabelValues(c.relay.Name).Inc()
+		return
+	}
+
 	method, payload, err := c.strategy.BuildRequest(bundle)
 	if err != nil {
 		c.logger.Error().Err(err).Str("relay", c.relay.Name).Str("bundle_id", bundle.BundleID).Msg("failed to build request")
@@ -146,6 +167,13 @@ func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.Incoming
 		c.logger.Info().Str("relay", c.relay.Name).
 			Int64("latency_ms", latencyMs).Int("status", resp.StatusCode).
 			Str("response", string(respBody)).Msg("relay response")
+	} else if resp.StatusCode == http.StatusTooManyRequests {
+		cooldown := c.cooldownMs()
+		c.rateLimitedUntil.Store(time.Now().Add(time.Duration(cooldown) * time.Millisecond).UnixNano())
+		BundleRateLimitedTotal.WithLabelValues(c.relay.Name).Inc()
+		c.logger.Warn().Str("relay", c.relay.Name).
+			Int64("latency_ms", latencyMs).Int64("cooldown_ms", cooldown).
+			Msg("relay returned 429, entering cooldown")
 	} else {
 		BundleFailedTotal.WithLabelValues(c.relay.Name).Inc()
 		c.logger.Warn().Str("relay", c.relay.Name).
@@ -185,8 +213,16 @@ var warmReqBody = func() []byte {
 }()
 
 func (c *RelayClient) WarmConnections(ctx context.Context) {
+	count := warmConnPerRelay
+	if c.relay.WarmupConnections > 0 {
+		count = c.relay.WarmupConnections
+	} else if c.relay.WarmupConnections < 0 {
+		// -1 means skip warmup entirely for this relay.
+		c.logger.Info().Str("relay", c.relay.Name).Msg("warmup skipped (disabled in config)")
+		return
+	}
 	var wg sync.WaitGroup
-	for i := 0; i < warmConnPerRelay; i++ {
+	for i := 0; i < count; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -204,5 +240,5 @@ func (c *RelayClient) WarmConnections(ctx context.Context) {
 		}()
 	}
 	wg.Wait()
-	c.logger.Info().Str("relay", c.relay.Name).Int("connections", warmConnPerRelay).Msg("connections pre-warmed")
+	c.logger.Info().Str("relay", c.relay.Name).Int("connections", count).Msg("connections pre-warmed")
 }

@@ -14,9 +14,11 @@
     {
       "name": "titanbuilder",
       "url": "https://eu.rpc.titanbuilder.xyz"
-    },{
+    },    {
       "name": "buildernet",
-      "url": "https://direct-eu.buildernet.org"
+      "url": "https://direct-eu.buildernet.org",
+      "warmup_connections": 5,
+      "rate_limit_cooldown_ms": 2000
     },{
         "name": "bobthebuilder",
       "url": "https://rpc.bobthebuilder.xyz"
@@ -26,16 +28,16 @@
       "url": "https://rpc.beaverbuild.org"
     },
     {
-      "name": "buildernet",
-      "url": "https://rpc.buildernet.org"
-    },
-    {
       "name": "flashbots",
       "url": "https://relay.flashbots.net"
     },   
     {
       "name": "quasar",
       "url": "https://rpc.quasar.win"
+    },
+    {
+      "name": "eurekabuilder",
+      "url": "https://rpc.eurekabuilder.xyz"
     }
   ],
   "refund": {

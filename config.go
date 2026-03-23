@@ -10,6 +10,12 @@ import (
 type RelayConfig struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
+	// WarmupConnections overrides the default number of parallel warmup
+	// requests sent to this relay on startup. Set to 0 to skip warmup.
+	WarmupConnections int `json:"warmup_connections,omitempty"`
+	// RateLimitCooldownMs is how long (in milliseconds) to pause sending
+	// to this relay after it responds with HTTP 429. Default: 1000ms.
+	RateLimitCooldownMs int `json:"rate_limit_cooldown_ms,omitempty"`
 }
 
 // ResolvedURL returns the relay URL with https:// prepended if no scheme is present.

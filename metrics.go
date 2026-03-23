@@ -21,6 +21,11 @@ var (
 		Help: "Total number of bundles that failed to send to relays",
 	}, []string{"relay"})
 
+	BundleRateLimitedTotal = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "bundle_rate_limited_total",
+		Help: "Total number of bundles dropped because the relay returned 429 or is in cooldown",
+	}, []string{"relay"})
+
 	RelayLatencyMs = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "relay_latency_ms",
 		Help:    "Latency in milliseconds for relay requests",

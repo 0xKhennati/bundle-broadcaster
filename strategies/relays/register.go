@@ -9,4 +9,5 @@ func init() {
 	strategies.RegisterRelay("bobthebuilder", &BobthebuilderBuilder{})
 	strategies.RegisterRelay("beaverbuild", &BeaverbuildBuilder{})
 	strategies.RegisterRelay("buildernet", &BuildernetBuilder{})
+	strategies.RegisterRelay("eurekabuilder", &EurekabuilderBuilder{})
 }
