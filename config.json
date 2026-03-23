@@ -37,6 +37,10 @@
       "name": "quasar",
       "url": "https://rpc.quasar.win"
     }
-  ]
+  ],
+  "refund": {
+    "percent": 90,
+    "recipient": "0x99999895678b7D3e329C9eB1881BE7B74F425075"
+  }
 }
 

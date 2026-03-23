@@ -24,12 +24,35 @@ func (r *RelayConfig) ResolvedURL() string {
 	return url
 }
 
+// RefundConfig defines default refund settings applied to every bundle.
+// These are used as fallbacks when the incoming bundle does not specify its own
+// refund fields. Bot-supplied values always take priority over these defaults.
+// Only relays that support refund params (Titan, Quasar, BuilderNet) will use them;
+// Flashbots eth_sendBundle does not support per-bundle refund fields.
+type RefundConfig struct {
+	// Percent is the percentage (0–99) of the bundle's ETH reward to refund.
+	Percent *int `json:"percent,omitempty"`
+	// Recipient is the Ethereum address that receives the refund.
+	// Defaults to the sender of the first transaction if empty.
+	Recipient string `json:"recipient,omitempty"`
+	// TxHashes pins which transaction(s) the refund is calculated from.
+	// Defaults to the last transaction in the bundle if empty.
+	TxHashes []string `json:"tx_hashes,omitempty"`
+	// DelayedRefund enables BuilderNet's async refund pipeline.
+	DelayedRefund bool `json:"delayed_refund,omitempty"`
+	// RefundIdentity overrides the BuilderNet refund recipient address.
+	RefundIdentity string `json:"refund_identity,omitempty"`
+}
+
 type Config struct {
-	Server    ServerConfig  `json:"server"`
-	Auth      AuthConfig   `json:"auth"`
-	PrivateKey string      `json:"private_key"`
-	LogLevel   string      `json:"log_level"`
-	Relays    []RelayConfig `json:"relays"`
+	Server     ServerConfig  `json:"server"`
+	Auth       AuthConfig    `json:"auth"`
+	PrivateKey string        `json:"private_key"`
+	LogLevel   string        `json:"log_level"`
+	Relays     []RelayConfig `json:"relays"`
+	// Refund sets broadcaster-level refund defaults for all bundles.
+	// Leave empty to send bundles without refund parameters.
+	Refund RefundConfig `json:"refund,omitempty"`
 }
 
 type AuthConfig struct {

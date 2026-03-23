@@ -22,6 +22,15 @@ func (b *QuasarBuilder) BuildRequest(bundle *strategies.IncomingBundle) (string,
 	if bundle.MaxTimestamp > 0 {
 		params["maxTimestamp"] = bundle.MaxTimestamp
 	}
+	if bundle.RefundPercent != nil {
+		params["refundPercent"] = *bundle.RefundPercent
+	}
+	if bundle.RefundRecipient != "" {
+		params["refundRecipient"] = bundle.RefundRecipient
+	}
+	if len(bundle.RefundTxHashes) > 0 {
+		params["refundTxHashes"] = bundle.RefundTxHashes
+	}
 	return "eth_sendBundle", params, nil
 }
 

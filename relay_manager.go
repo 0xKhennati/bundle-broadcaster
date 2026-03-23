@@ -26,6 +26,7 @@ func newSharedHTTPClient() *http.Client {
 
 type RelayManager struct {
 	clients []*RelayClient
+	refund  RefundConfig
 	logger  zerolog.Logger
 }
 
@@ -43,11 +44,42 @@ func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logge
 	}
 	return &RelayManager{
 		clients: clients,
+		refund:  cfg.Refund,
 		logger:  logger,
 	}
 }
 
+// applyRefundDefaults returns a shallow copy of bundle with any unset refund
+// fields filled in from the broadcaster-level RefundConfig. Bot-supplied values
+// always take precedence; the config is only the fallback.
+func (m *RelayManager) applyRefundDefaults(bundle *strategies.IncomingBundle) *strategies.IncomingBundle {
+	r := m.refund
+	// Fast path: no config-level refund defined at all.
+	if r.Percent == nil && r.Recipient == "" && len(r.TxHashes) == 0 && !r.DelayedRefund && r.RefundIdentity == "" {
+		return bundle
+	}
+	// Shallow copy so we never mutate the caller's struct.
+	b := *bundle
+	if b.RefundPercent == nil && r.Percent != nil {
+		b.RefundPercent = r.Percent
+	}
+	if b.RefundRecipient == "" && r.Recipient != "" {
+		b.RefundRecipient = r.Recipient
+	}
+	if len(b.RefundTxHashes) == 0 && len(r.TxHashes) > 0 {
+		b.RefundTxHashes = r.TxHashes
+	}
+	if !b.DelayedRefund && r.DelayedRefund {
+		b.DelayedRefund = r.DelayedRefund
+	}
+	if b.RefundIdentity == "" && r.RefundIdentity != "" {
+		b.RefundIdentity = r.RefundIdentity
+	}
+	return &b
+}
+
 func (m *RelayManager) Broadcast(ctx context.Context, bundle *strategies.IncomingBundle) {
+	bundle = m.applyRefundDefaults(bundle)
 	var wg sync.WaitGroup
 	for _, client := range m.clients {
 		wg.Add(1)

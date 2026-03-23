@@ -17,10 +17,17 @@ func (b *TitanbuilderBuilder) BuildRequest(bundle *strategies.IncomingBundle) (s
 	// 		"targetPools": bundle.TargetPools,
 	// 	}, nil
 	// }
-	return "eth_sendBundle", map[string]interface{}{
+	params := map[string]interface{}{
 		"txs":         bundle.RawTxs,
 		"blockNumber": fmt.Sprintf("0x%x", bundle.TargetBlock),
-	}, nil
+	}
+	if bundle.RefundPercent != nil {
+		params["refundPercent"] = *bundle.RefundPercent
+	}
+	if bundle.RefundRecipient != "" {
+		params["refundRecipient"] = bundle.RefundRecipient
+	}
+	return "eth_sendBundle", params, nil
 }
 
 // {

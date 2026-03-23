@@ -18,4 +18,15 @@ type BundleRequest struct {
 	MaxTimestamp      uint64   `json:"max_timestamp"`
 	RevertingTxHashes []string `json:"reverting_tx_hashes"`
 	TargetPools       []string `json:"target_pools"`
+
+	// Refund configuration. RefundPercent (0–99) controls how much of the
+	// bundle's ETH reward is returned to RefundRecipient (defaults to the
+	// sender of the first tx if omitted). RefundTxHashes pins which tx
+	// the refund is calculated from (defaults to the last tx in the bundle).
+	// DelayedRefund and RefundIdentity are BuilderNet-only options.
+	RefundPercent  *int     `json:"refund_percent,omitempty"`
+	RefundRecipient string  `json:"refund_recipient,omitempty"`
+	RefundTxHashes []string `json:"refund_tx_hashes,omitempty"`
+	DelayedRefund  bool     `json:"delayed_refund,omitempty"`
+	RefundIdentity string   `json:"refund_identity,omitempty"`
 }

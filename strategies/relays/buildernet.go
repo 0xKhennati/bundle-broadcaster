@@ -22,6 +22,21 @@ func (b *BuildernetBuilder) BuildRequest(bundle *strategies.IncomingBundle) (str
 	if bundle.MaxTimestamp > 0 {
 		params["maxTimestamp"] = bundle.MaxTimestamp
 	}
+	if bundle.RefundPercent != nil {
+		params["refundPercent"] = *bundle.RefundPercent
+	}
+	if bundle.RefundRecipient != "" {
+		params["refundRecipient"] = bundle.RefundRecipient
+	}
+	if len(bundle.RefundTxHashes) > 0 {
+		params["refundTxHashes"] = bundle.RefundTxHashes
+	}
+	if bundle.DelayedRefund {
+		params["delayedRefund"] = true
+	}
+	if bundle.RefundIdentity != "" {
+		params["refundIdentity"] = bundle.RefundIdentity
+	}
 	return "eth_sendBundle", params, nil
 }
 

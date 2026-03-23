@@ -20,4 +20,14 @@ type IncomingBundle struct {
 	MaxTimestamp      uint64   `json:"max_timestamp"`
 	RevertingTxHashes []string `json:"reverting_tx_hashes"`
 	TargetPools       []string `json:"target_pools"`
+
+	// Refund fields — forwarded to relays that support them.
+	// RefundPercent is the percentage (0–99) of the bundle's ETH reward
+	// that will be sent back to RefundRecipient.
+	RefundPercent    *int     `json:"refund_percent,omitempty"`
+	RefundRecipient  string   `json:"refund_recipient,omitempty"`
+	RefundTxHashes   []string `json:"refund_tx_hashes,omitempty"`
+	// DelayedRefund and RefundIdentity are BuilderNet-specific.
+	DelayedRefund  bool   `json:"delayed_refund,omitempty"`
+	RefundIdentity string `json:"refund_identity,omitempty"`
 }
