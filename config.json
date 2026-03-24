@@ -13,7 +13,7 @@
   "relays": [
     {
       "name": "titanbuilder",
-      "url": "https://eu.rpc.titanbuilder.xyz"
+      "url": "https://eu.rpc.titanbuilder.xyz/"
     },    {
       "name": "buildernet",
       "url": "https://direct-eu.buildernet.org",
@@ -38,6 +38,26 @@
     {
       "name": "eurekabuilder",
       "url": "https://rpc.eurekabuilder.xyz"
+    },
+    {
+      "name": "rsyncbuilder",
+      "url": "https://rsync-builder.xyz"
+    },
+    {
+      "name": "jetbldr",
+      "url": "https://rpc.jetbldr.xyz"
+    },
+    {
+      "name": "tbuilder",
+      "url": "https://rpc.tbuilder.xyz"
+    },
+    {
+      "name": "turbobuilder",
+      "url": "https://rpc.turbobuilder.xyz"
+    },
+    {
+      "name": "snailbuilder",
+      "url": "https://rpc.snailbuilder.sh"
     }
   ],
   "refund": {

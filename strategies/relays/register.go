@@ -10,4 +10,9 @@ func init() {
 	strategies.RegisterRelay("beaverbuild", &BeaverbuildBuilder{})
 	strategies.RegisterRelay("buildernet", &BuildernetBuilder{})
 	strategies.RegisterRelay("eurekabuilder", &EurekabuilderBuilder{})
+	strategies.RegisterRelay("rsyncbuilder", &RsyncbuilderBuilder{})
+	strategies.RegisterRelay("jetbldr", &JetbldrBuilder{})
+	strategies.RegisterRelay("tbuilder", &TbuilderBuilder{})
+	strategies.RegisterRelay("turbobuilder", &TurbobuilderBuilder{})
+	strategies.RegisterRelay("snailbuilder", &SnailbuilderBuilder{})
 }
