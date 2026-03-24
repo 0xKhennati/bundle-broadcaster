@@ -3,14 +3,18 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/0xKhennati/bundle-broadcaster/strategies"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/rs/zerolog"
 )
 
@@ -139,15 +143,35 @@ func (s *Simulator) SimulateAsync(bundle *strategies.IncomingBundle) {
 		ethToBuilderEth := weiHexToEth(r.EthSentToCoinbase)
 		gasFeesEth := weiHexToEth(r.GasFees)
 
-		s.logger.Info().
+		stateBlock := r.StateBlockNumber
+		if stateBlock == 0 {
+			stateBlock = targetBlock - 1
+		}
+
+		isZeroPayment := r.EthSentToCoinbase == "" || r.EthSentToCoinbase == "0x0" || r.EthSentToCoinbase == "0"
+
+		logEvent := s.logger.Info().
 			Str("bundle_id", bundleID).
 			Uint64("target_block", targetBlock).
 			Str("coinbase_diff_eth", coinbaseDiffEth).
 			Str("eth_to_builder_eth", ethToBuilderEth).
 			Str("gas_fees_eth", gasFeesEth).
 			Uint64("total_gas_used", r.TotalGasUsed).
-			Str("bundle_gas_price", r.BundleGasPrice).
-			Msg("[simulate] bundle VALID ✓ — if not landing, increase coinbase payment")
+			Str("bundle_gas_price", r.BundleGasPrice)
+
+		if isZeroPayment {
+			// Log a Tenderly URL for every tx so the user can inspect why
+			// there is no coinbase payment.
+			for i, rawTx := range txs {
+				tURL := buildTenderlyURL(rawTx, stateBlock)
+				if tURL != "" {
+					logEvent = logEvent.Str(fmt.Sprintf("tenderly_tx%d", i), tURL)
+				}
+			}
+			logEvent.Msg("[simulate] bundle VALID but pays 0 to builder — open Tenderly links to debug missing coinbase payment")
+		} else {
+			logEvent.Msg("[simulate] bundle VALID ✓ — if not landing, increase coinbase payment")
+		}
 	}()
 }
 
@@ -199,6 +223,53 @@ func (s *Simulator) callBundle(ctx context.Context, txs []string, targetBlock ui
 		return nil, fmt.Errorf("unmarshal (body=%s): %w", string(respBody), err)
 	}
 	return &result, nil
+}
+
+// buildTenderlyURL decodes a raw signed transaction and returns a Tenderly
+// simulator URL pre-filled with all transaction fields, anchored to blockNumber
+// for state. Returns "" if the transaction cannot be decoded.
+func buildTenderlyURL(rawHex string, blockNumber uint64) string {
+	s := strings.TrimPrefix(strings.TrimPrefix(rawHex, "0x"), "0X")
+	rawBytes, err := hex.DecodeString(s)
+	if err != nil {
+		return ""
+	}
+
+	tx := new(types.Transaction)
+	if err := tx.UnmarshalBinary(rawBytes); err != nil {
+		return ""
+	}
+
+	signer := types.LatestSignerForChainID(tx.ChainId())
+	from, err := types.Sender(signer, tx)
+	if err != nil {
+		return ""
+	}
+
+	to := "0x0000000000000000000000000000000000000000"
+	if tx.To() != nil {
+		to = tx.To().Hex()
+	}
+
+	gasPrice := tx.GasPrice()
+	if tx.Type() == types.DynamicFeeTxType && tx.GasFeeCap() != nil {
+		gasPrice = tx.GasFeeCap()
+	}
+	if gasPrice == nil {
+		gasPrice = big.NewInt(0)
+	}
+
+	params := url.Values{}
+	params.Set("network", "1")
+	params.Set("from", from.Hex())
+	params.Set("to", to)
+	params.Set("gas", fmt.Sprintf("%d", tx.Gas()))
+	params.Set("gasPrice", gasPrice.String())
+	params.Set("value", tx.Value().String())
+	params.Set("rawFunctionInput", "0x"+hex.EncodeToString(tx.Data()))
+	params.Set("block", fmt.Sprintf("%d", blockNumber))
+
+	return "https://dashboard.tenderly.co/simulator/new?" + params.Encode()
 }
 
 // weiHexToEth converts a hex wei string like "0x2386f26fc10000" to a

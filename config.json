@@ -42,10 +42,6 @@
     {
       "name": "jetbldr",
       "url": "https://rpc.jetbldr.xyz"
-    },
-    {
-      "name": "snailbuilder",
-      "url": "https://rpc.snailbuilder.sh"
     }
   ],
   "refund": {
