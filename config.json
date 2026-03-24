@@ -13,10 +13,10 @@
   "relays": [
     {
       "name": "titanbuilder",
-      "url": "https://eu.rpc.titanbuilder.xyz/"
+      "url": "https://rpc.titanbuilder.xyz"
     },    {
       "name": "buildernet",
-      "url": "https://direct-eu.buildernet.org",
+      "url": "https://rpc.buildernet.org",
       "warmup_connections": 5,
       "rate_limit_cooldown_ms": 2000
     },{
