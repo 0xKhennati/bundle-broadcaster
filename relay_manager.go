@@ -25,9 +25,10 @@ func newSharedHTTPClient() *http.Client {
 }
 
 type RelayManager struct {
-	clients []*RelayClient
-	refund  RefundConfig
-	logger  zerolog.Logger
+	clients   []*RelayClient
+	refund    RefundConfig
+	simulator *Simulator
+	logger    zerolog.Logger
 }
 
 func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logger zerolog.Logger) *RelayManager {
@@ -42,10 +43,18 @@ func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logge
 		client := NewRelayClient(relay, builder, signer, httpClient, logger)
 		clients = append(clients, client)
 	}
+
+	var sim *Simulator
+	if cfg.Simulate.Enabled {
+		sim = NewSimulator(cfg.Simulate, signer, httpClient, logger)
+		logger.Info().Str("url", cfg.Simulate.ResolvedURL()).Msg("bundle simulation enabled")
+	}
+
 	return &RelayManager{
-		clients: clients,
-		refund:  cfg.Refund,
-		logger:  logger,
+		clients:   clients,
+		refund:    cfg.Refund,
+		simulator: sim,
+		logger:    logger,
 	}
 }
 
@@ -80,6 +89,12 @@ func (m *RelayManager) applyRefundDefaults(bundle *strategies.IncomingBundle) *s
 
 func (m *RelayManager) Broadcast(ctx context.Context, bundle *strategies.IncomingBundle) {
 	bundle = m.applyRefundDefaults(bundle)
+
+	// Fire simulation in background before fanning out — zero added latency.
+	if m.simulator != nil {
+		m.simulator.SimulateAsync(bundle)
+	}
+
 	var wg sync.WaitGroup
 	for _, client := range m.clients {
 		wg.Add(1)

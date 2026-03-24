@@ -50,15 +50,32 @@ type RefundConfig struct {
 	RefundIdentity string `json:"refund_identity,omitempty"`
 }
 
+// SimulateConfig controls the optional eth_callBundle simulation feature.
+// When enabled, every bundle is simulated against Flashbots in a background
+// goroutine and the result is logged. This never delays or blocks broadcasting.
+type SimulateConfig struct {
+	// Enabled turns the simulation on or off.
+	Enabled bool `json:"enabled"`
+	// URL is the eth_callBundle endpoint. Defaults to https://relay.flashbots.net.
+	URL string `json:"url,omitempty"`
+}
+
+func (s *SimulateConfig) ResolvedURL() string {
+	if s.URL != "" {
+		return s.URL
+	}
+	return "https://relay.flashbots.net"
+}
+
 type Config struct {
-	Server     ServerConfig  `json:"server"`
-	Auth       AuthConfig    `json:"auth"`
-	PrivateKey string        `json:"private_key"`
-	LogLevel   string        `json:"log_level"`
-	Relays     []RelayConfig `json:"relays"`
-	// Refund sets broadcaster-level refund defaults for all bundles.
-	// Leave empty to send bundles without refund parameters.
-	Refund RefundConfig `json:"refund,omitempty"`
+	Server     ServerConfig   `json:"server"`
+	Auth       AuthConfig     `json:"auth"`
+	PrivateKey string         `json:"private_key"`
+	LogLevel   string         `json:"log_level"`
+	Relays     []RelayConfig  `json:"relays"`
+	Refund     RefundConfig   `json:"refund,omitempty"`
+	// Simulate enables background eth_callBundle logging for every bundle.
+	Simulate SimulateConfig `json:"simulate,omitempty"`
 }
 
 type AuthConfig struct {
