@@ -28,15 +28,37 @@ type BundleRecord struct {
 	TotalGasUsed    uint64 `json:"total_gas_used,omitempty"`
 	BundleGasPrice  string `json:"bundle_gas_price,omitempty"`
 	SimStateBlock   uint64 `json:"sim_state_block,omitempty"`
+
+	// Full decoded transaction fields for every tx in the bundle.
+	Transactions []TxDetail `json:"transactions,omitempty"`
+}
+
+// TxDetail holds all decoded fields of one signed transaction in a bundle.
+type TxDetail struct {
+	Hash                 string `json:"hash"`
+	From                 string `json:"from"`
+	To                   string `json:"to,omitempty"`          // empty on contract creation
+	Nonce                uint64 `json:"nonce"`
+	Gas                  uint64 `json:"gas"`
+	// Gas price fields — only one set is populated depending on tx type.
+	GasPrice             string `json:"gas_price,omitempty"`              // legacy / type-0
+	MaxFeePerGas         string `json:"max_fee_per_gas,omitempty"`        // EIP-1559 / type-2
+	MaxPriorityFeePerGas string `json:"max_priority_fee_per_gas,omitempty"` // EIP-1559 / type-2
+	Value                string `json:"value_eth"`   // ETH, human-readable (e.g. "0.050000000")
+	ValueWei             string `json:"value_wei"`   // wei as decimal string
+	Data                 string `json:"data"`        // full calldata hex (0x-prefixed)
+	Type                 uint8  `json:"type"`        // 0=legacy 1=accessList 2=dynamicFee
+	ChainID              string `json:"chain_id,omitempty"`
 }
 
 // HashEvent is emitted by a RelayClient when it receives a bundle hash from a builder.
 type HashEvent struct {
-	BundleID    string
-	Builder     string
-	BundleHash  string
-	TargetBlock uint64
-	LastTxHash  string // hash of the last transaction in the bundle (the backrun tx)
+	BundleID     string
+	Builder      string
+	BundleHash   string
+	TargetBlock  uint64
+	LastTxHash   string     // hash of the last transaction in the bundle (the backrun tx)
+	Transactions []TxDetail // all decoded transactions in submission order
 }
 
 // SimEvent is emitted by the Simulator when eth_callBundle completes successfully.
@@ -215,12 +237,13 @@ func (t *Tracker) run() {
 				pending[e.BundleID] = make(map[string]*pendingEntry)
 			}
 			record := BundleRecord{
-				BundleID:    e.BundleID,
-				Builder:     e.Builder,
-				BundleHash:  e.BundleHash,
-				LastTxHash:  e.LastTxHash,
-				TargetBlock: e.TargetBlock,
-				Timestamp:   time.Now().UTC(),
+				BundleID:     e.BundleID,
+				Builder:      e.Builder,
+				BundleHash:   e.BundleHash,
+				LastTxHash:   e.LastTxHash,
+				TargetBlock:  e.TargetBlock,
+				Timestamp:    time.Now().UTC(),
+				Transactions: e.Transactions,
 			}
 			// Pre-fill sim fields if the sim result is already cached
 			// (simulation fires before broadcasts so it often arrives first).

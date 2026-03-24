@@ -6,7 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"math/big"
 	"net"
 	"net/http"
 	"strings"
@@ -176,11 +178,12 @@ func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.Incoming
 		if c.tracker != nil {
 			if hash := parseBundleHash(respBody); hash != "" {
 				c.tracker.RecordHash(HashEvent{
-					BundleID:    bundle.BundleID,
-					Builder:     c.relay.Name,
-					BundleHash:  hash,
-					TargetBlock: bundle.TargetBlock,
-					LastTxHash:  computeLastTxHash(bundle.RawTxs),
+					BundleID:     bundle.BundleID,
+					Builder:      c.relay.Name,
+					BundleHash:   hash,
+					TargetBlock:  bundle.TargetBlock,
+					LastTxHash:   computeLastTxHash(bundle.RawTxs),
+					Transactions: decodeTxDetails(bundle.RawTxs),
 				})
 			}
 		}
@@ -235,6 +238,73 @@ func computeLastTxHash(rawTxs []string) string {
 		return ""
 	}
 	return tx.Hash().Hex()
+}
+
+// decodeTxDetails decodes every raw signed transaction and returns a slice of
+// TxDetail structs with all human-readable fields. Transactions that cannot be
+// decoded are silently skipped.
+func decodeTxDetails(rawTxs []string) []TxDetail {
+	details := make([]TxDetail, 0, len(rawTxs))
+	for _, raw := range rawTxs {
+		s := strings.TrimPrefix(strings.TrimPrefix(raw, "0x"), "0X")
+		b, err := hex.DecodeString(s)
+		if err != nil {
+			continue
+		}
+		tx := new(types.Transaction)
+		if err := tx.UnmarshalBinary(b); err != nil {
+			continue
+		}
+		signer := types.LatestSignerForChainID(tx.ChainId())
+		from, err := types.Sender(signer, tx)
+		if err != nil {
+			continue
+		}
+
+		to := ""
+		if tx.To() != nil {
+			to = tx.To().Hex()
+		}
+
+		d := TxDetail{
+			Hash:     tx.Hash().Hex(),
+			From:     from.Hex(),
+			To:       to,
+			Nonce:    tx.Nonce(),
+			Gas:      tx.Gas(),
+			Value:    bigIntToEth(tx.Value()),
+			ValueWei: tx.Value().String(),
+			Data:     "0x" + hex.EncodeToString(tx.Data()),
+			Type:     tx.Type(),
+		}
+		if tx.ChainId() != nil {
+			d.ChainID = tx.ChainId().String()
+		}
+		switch tx.Type() {
+		case types.DynamicFeeTxType:
+			if tx.GasFeeCap() != nil {
+				d.MaxFeePerGas = tx.GasFeeCap().String()
+			}
+			if tx.GasTipCap() != nil {
+				d.MaxPriorityFeePerGas = tx.GasTipCap().String()
+			}
+		default:
+			if tx.GasPrice() != nil {
+				d.GasPrice = tx.GasPrice().String()
+			}
+		}
+		details = append(details, d)
+	}
+	return details
+}
+
+// bigIntToEth converts a *big.Int wei value to a human-readable ETH string.
+func bigIntToEth(wei *big.Int) string {
+	if wei == nil || wei.Sign() == 0 {
+		return "0.000000000"
+	}
+	eth := new(big.Float).Quo(new(big.Float).SetInt(wei), big.NewFloat(1e18))
+	return fmt.Sprintf("%.9f", eth)
 }
 
 // parseBundleHash extracts the bundle hash from an eth_sendBundle JSON-RPC response.
