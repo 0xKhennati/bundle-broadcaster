@@ -50,6 +50,38 @@ type RefundConfig struct {
 	RefundIdentity string `json:"refund_identity,omitempty"`
 }
 
+// TrackingConfig controls the optional bundle-hash tracking feature.
+// When enabled, every bundle hash returned by a tracked builder is stored in a
+// per-builder JSONL file, correlated with the simulation result so you can
+// bring concrete data when querying builders about missed inclusions.
+type TrackingConfig struct {
+	// Enabled turns tracking on or off.
+	Enabled bool `json:"enabled"`
+	// Dir is the directory where JSONL files are written.
+	// Defaults to "tracking/" relative to the working directory.
+	Dir string `json:"dir,omitempty"`
+	// Builders lists the relay names to track (e.g. ["titanbuilder","beaverbuild","buildernet"]).
+	// Only relays whose name appears here will have their bundle hashes recorded.
+	Builders []string `json:"builders,omitempty"`
+}
+
+func (t *TrackingConfig) ResolvedDir() string {
+	if t.Dir != "" {
+		return t.Dir
+	}
+	return "tracking"
+}
+
+// IsTracked returns true if the given relay name should be tracked.
+func (t *TrackingConfig) IsTracked(builder string) bool {
+	for _, b := range t.Builders {
+		if b == builder {
+			return true
+		}
+	}
+	return false
+}
+
 // SimulateConfig controls the optional eth_callBundle simulation feature.
 // When enabled, every bundle is simulated against Flashbots in a background
 // goroutine and the result is logged. This never delays or blocks broadcasting.
@@ -73,9 +105,9 @@ type Config struct {
 	PrivateKey string         `json:"private_key"`
 	LogLevel   string         `json:"log_level"`
 	Relays     []RelayConfig  `json:"relays"`
-	Refund     RefundConfig   `json:"refund,omitempty"`
-	// Simulate enables background eth_callBundle logging for every bundle.
+	Refund   RefundConfig   `json:"refund,omitempty"`
 	Simulate SimulateConfig `json:"simulate,omitempty"`
+	Tracking TrackingConfig `json:"tracking,omitempty"`
 }
 
 type AuthConfig struct {

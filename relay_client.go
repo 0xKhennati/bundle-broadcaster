@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/0xKhennati/bundle-broadcaster/strategies"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/rs/zerolog"
 )
 
@@ -39,6 +41,9 @@ type RelayClient struct {
 	relay    RelayConfig
 	strategy strategies.RelayStrategy
 	logger   zerolog.Logger
+	// tracker is optional; when non-nil the client records the bundle hash
+	// returned by this relay so it can be correlated with simulation results.
+	tracker *Tracker
 	// rateLimitedUntil holds a Unix nanosecond timestamp.
 	// While time.Now().UnixNano() < rateLimitedUntil, all broadcasts are skipped.
 	rateLimitedUntil atomic.Int64
@@ -167,6 +172,18 @@ func (c *RelayClient) Broadcast(ctx context.Context, bundle *strategies.Incoming
 		c.logger.Info().Str("relay", c.relay.Name).
 			Int64("latency_ms", latencyMs).Int("status", resp.StatusCode).
 			Str("response", string(respBody)).Msg("relay response")
+		// Record the bundle hash for tracking if this relay is configured for it.
+		if c.tracker != nil {
+			if hash := parseBundleHash(respBody); hash != "" {
+				c.tracker.RecordHash(HashEvent{
+					BundleID:    bundle.BundleID,
+					Builder:     c.relay.Name,
+					BundleHash:  hash,
+					TargetBlock: bundle.TargetBlock,
+					LastTxHash:  computeLastTxHash(bundle.RawTxs),
+				})
+			}
+		}
 	} else if resp.StatusCode == http.StatusTooManyRequests {
 		cooldown := c.cooldownMs()
 		c.rateLimitedUntil.Store(time.Now().Add(time.Duration(cooldown) * time.Millisecond).UnixNano())
@@ -200,6 +217,49 @@ func isRetryableConnError(err error) bool {
 		}
 	}
 	return false
+}
+
+// computeLastTxHash decodes the last raw transaction in the bundle and returns
+// its transaction hash. Returns "" if the slice is empty or the tx cannot be decoded.
+func computeLastTxHash(rawTxs []string) string {
+	if len(rawTxs) == 0 {
+		return ""
+	}
+	raw := strings.TrimPrefix(rawTxs[len(rawTxs)-1], "0x")
+	b, err := hex.DecodeString(raw)
+	if err != nil {
+		return ""
+	}
+	tx := new(types.Transaction)
+	if err := tx.UnmarshalBinary(b); err != nil {
+		return ""
+	}
+	return tx.Hash().Hex()
+}
+
+// parseBundleHash extracts the bundle hash from an eth_sendBundle JSON-RPC response.
+// Handles both object form {"result":{"bundleHash":"0x..."}} and plain string
+// form {"result":"0x..."} since different builders use different formats.
+func parseBundleHash(body []byte) string {
+	var resp struct {
+		Result json.RawMessage `json:"result"`
+	}
+	if err := json.Unmarshal(body, &resp); err != nil || len(resp.Result) == 0 {
+		return ""
+	}
+	// Object form: {"bundleHash": "0x..."}
+	var obj struct {
+		BundleHash string `json:"bundleHash"`
+	}
+	if err := json.Unmarshal(resp.Result, &obj); err == nil && obj.BundleHash != "" {
+		return obj.BundleHash
+	}
+	// Plain string form: "0x..."
+	var s string
+	if err := json.Unmarshal(resp.Result, &s); err == nil && strings.HasPrefix(s, "0x") {
+		return s
+	}
+	return ""
 }
 
 var warmReqBody = func() []byte {

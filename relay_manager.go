@@ -28,10 +28,21 @@ type RelayManager struct {
 	clients   []*RelayClient
 	refund    RefundConfig
 	simulator *Simulator
+	tracker   *Tracker
 	logger    zerolog.Logger
 }
 
 func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logger zerolog.Logger) *RelayManager {
+	// Initialize tracker first so relay clients can reference it.
+	var tracker *Tracker
+	if cfg.Tracking.Enabled && len(cfg.Tracking.Builders) > 0 {
+		tracker = NewTracker(cfg.Tracking, logger)
+		logger.Info().
+			Str("dir", cfg.Tracking.ResolvedDir()).
+			Strs("builders", cfg.Tracking.Builders).
+			Msg("bundle tracking enabled")
+	}
+
 	clients := make([]*RelayClient, 0, len(cfg.Relays))
 	for _, relay := range cfg.Relays {
 		builder := strategies.GetRelayBuilder(relay.Name)
@@ -41,12 +52,19 @@ func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logge
 			continue
 		}
 		client := NewRelayClient(relay, builder, signer, httpClient, logger)
+		// Attach tracker only for the builders the user wants to track.
+		if tracker != nil && cfg.Tracking.IsTracked(relay.Name) {
+			client.tracker = tracker
+		}
 		clients = append(clients, client)
 	}
 
 	var sim *Simulator
 	if cfg.Simulate.Enabled {
 		sim = NewSimulator(cfg.Simulate, signer, httpClient, logger)
+		if tracker != nil {
+			sim.tracker = tracker
+		}
 		logger.Info().Str("url", cfg.Simulate.ResolvedURL()).Msg("bundle simulation enabled")
 	}
 
@@ -54,7 +72,16 @@ func NewRelayManager(cfg *Config, signer *Signer, httpClient *http.Client, logge
 		clients:   clients,
 		refund:    cfg.Refund,
 		simulator: sim,
+		tracker:   tracker,
 		logger:    logger,
+	}
+}
+
+// Shutdown flushes the tracker to disk and releases its resources.
+// Call this during graceful shutdown before the process exits.
+func (m *RelayManager) Shutdown() {
+	if m.tracker != nil {
+		m.tracker.Stop()
 	}
 }
 

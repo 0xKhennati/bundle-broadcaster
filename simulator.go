@@ -65,10 +65,11 @@ type jsonRPCError struct {
 // Simulator fires eth_callBundle against Flashbots in a background goroutine
 // and logs the result. It never blocks bundle broadcasting.
 type Simulator struct {
-	cfg    SimulateConfig
-	signer *Signer
-	client *http.Client
-	logger zerolog.Logger
+	cfg     SimulateConfig
+	signer  *Signer
+	client  *http.Client
+	logger  zerolog.Logger
+	tracker *Tracker // optional; when set, sim results are forwarded to the tracker
 }
 
 func NewSimulator(cfg SimulateConfig, signer *Signer, httpClient *http.Client, logger zerolog.Logger) *Simulator {
@@ -146,6 +147,19 @@ func (s *Simulator) SimulateAsync(bundle *strategies.IncomingBundle) {
 		stateBlock := r.StateBlockNumber
 		if stateBlock == 0 {
 			stateBlock = targetBlock - 1
+		}
+
+		// Forward to tracker so it can correlate with builder bundle hashes.
+		if s.tracker != nil {
+			s.tracker.RecordSim(SimEvent{
+				BundleID:        bundleID,
+				CoinbaseDiffETH: coinbaseDiffEth,
+				EthToBuilderETH: ethToBuilderEth,
+				GasFeesETH:      gasFeesEth,
+				TotalGasUsed:    r.TotalGasUsed,
+				BundleGasPrice:  r.BundleGasPrice,
+				StateBlock:      stateBlock,
+			})
 		}
 
 		isZeroPayment := r.EthSentToCoinbase == "" || r.EthSentToCoinbase == "0x0" || r.EthSentToCoinbase == "0"

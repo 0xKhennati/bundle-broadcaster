@@ -143,5 +143,8 @@ func main() {
 		logger.Error().Err(err).Msg("HTTP server shutdown error")
 	}
 
+	// Flush pending tracking records to disk before exit.
+	manager.Shutdown()
+
 	logger.Info().Msg("shutdown complete")
 }

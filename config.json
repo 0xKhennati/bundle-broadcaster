@@ -51,6 +51,11 @@
   "simulate": {
     "enabled": false,
     "url": "https://relay.flashbots.net"
+  },
+  "tracking": {
+    "enabled": false,
+    "dir": "tracking",
+    "builders": ["titanbuilder", "beaverbuild", "buildernet"]
   }
 }
 
