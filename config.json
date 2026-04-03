@@ -19,19 +19,9 @@
     { "name": "bobthebuilder", "url": "https://rpc.bobthebuilder.xyz" },
     { "name": "eurekabuilder", "url": "https://rpc.eurekabuilder.xyz" },
     { "name": "jetbldr",       "url": "https://rpc.jetbldr.xyz" },
-    { "name": "f1b",           "url": "https://rpc.f1b.io" },
-    { "name": "builder0x69",   "url": "https://builder0x69.io" },
-    { "name": "eigenphi",      "url": "https://builder.eigenphi.io" },
     { "name": "boba",          "url": "https://boba-builder.com/searcher/bundle" },
-    { "name": "gambit",        "url": "https://builder.gmbit.co/rpc" },
-    { "name": "payload",       "url": "https://rpc.payload.de" },
-    { "name": "loki",          "url": "https://rpc.lokibuilder.xyz" },
-    { "name": "buildai",       "url": "https://buildai.net" },
-    { "name": "penguin",       "url": "https://rpc.penguinbuild.org" },
     { "name": "btcs",          "url": "https://flashbots.btcs.com" },
-    { "name": "bloxroute",     "url": "https://rpc-builder.blxrbdn.com" },
-    { "name": "blockbeelder",  "url": "https://blockbeelder.com/rpc" },
-    { "name": "tbuilder",      "url": "https://flashbots.rpc.tbuilder.xyz" }
+    { "name": "blockbeelder",  "url": "https://blockbeelder.com/rpc" }
   ],
   "refund": {
     "percent": 90,
